@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload</title>
+</head>
+<body>
+    <h1>Upload Image to Firebase</h1>
+    <form id="uploadForm">
+        <label for="image">Select Image:</label>
+        <input type="file" id="image" accept="image/*" required>
+        <br><br>
+        <label for="name">Image Name (optional):</label>
+        <input type="text" id="name" placeholder="Enter image name">
+        <br><br>
+        <button type="submit">Upload</button>
+    </form>
+    <p id="response"></p>
+
+    <script>
+        document.getElementById("uploadForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const imageInput = document.getElementById("image");
+            const nameInput = document.getElementById("name");
+            const responseText = document.getElementById("response");
+
+            if (!imageInput.files.length) {
+                responseText.innerText = "Please select an image.";
+                return;
+            }
+
+            const file = imageInput.files[0];
+            const name = nameInput.value;
+
+            // Convert image to Base64
+            const reader = new FileReader();
+            reader.onload = async () => {
+                const imageBase64 = reader.result.split(",")[1]; // Extract Base64 part
+
+                const data = {
+                    imageBase64: imageBase64,
+                    name: name || undefined // If name is empty, don't send it
+                };
+
+                try {
+                    const response = await fetch("http://127.0.0.1:8000/upload", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    responseText.innerText = JSON.stringify(result);
+                } catch (error) {
+                    responseText.innerText = "Error uploading image: " + error.message;
+                }
+            };
+
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>
