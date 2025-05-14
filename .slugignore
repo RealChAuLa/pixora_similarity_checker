@@ -1,0 +1,11 @@
+*.log
+*.gz
+*.zip
+*.tar
+node_modules/
+__pycache__/
+.env
+.DS_Store
+.git/
+*.pt
+*.onnx
