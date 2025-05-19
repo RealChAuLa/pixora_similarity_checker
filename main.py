@@ -9,6 +9,7 @@ import torch
 from torchvision import models, transforms
 from PIL import Image
 from io import BytesIO
+import uvicorn
 
 load_dotenv()
 app = FastAPI()
@@ -36,7 +37,7 @@ db_name = os.getenv("DB_NAME")
 if not mongodb_uri or not db_name:
     raise Exception("MongoDB URI and Database Name must be set in the .env file.")
 
-client = AsyncIOMotorClient(mongodb_uri)
+client = AsyncIOMotorClient(mongodb_uri , auto_encryption_opts=None)
 db = client[db_name]
 
 async def get_image_embedding(image_base64: str):
@@ -85,3 +86,8 @@ async def upload_image(request: Request):
         return {"message": "NFT saved successfully in MongoDB"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
