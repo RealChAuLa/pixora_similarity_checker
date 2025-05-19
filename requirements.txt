@@ -3,8 +3,8 @@ uvicorn==0.22.0
 python-dotenv==1.0.0
 pillow==9.5.0
 numpy==1.25.0
-motor
-pymongo==4.1
+pymongo==3.12.3
+dnspython==2.0.0
 torch==2.0.1+cpu
 torchvision==0.15.2+cpu
 -f https://download.pytorch.org/whl/torch_stable.html
