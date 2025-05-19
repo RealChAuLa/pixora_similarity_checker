@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+# Removing motor import
+# from motor.motor_asyncio import AsyncIOMotorClient
+# Adding direct pymongo import instead
+from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 import base64
@@ -37,7 +40,8 @@ db_name = os.getenv("DB_NAME")
 if not mongodb_uri or not db_name:
     raise Exception("MongoDB URI and Database Name must be set in the .env file.")
 
-client = AsyncIOMotorClient(mongodb_uri , auto_encryption_opts=None)
+# Changed from AsyncIOMotorClient to regular MongoClient
+client = MongoClient(mongodb_uri)
 db = client[db_name]
 
 async def get_image_embedding(image_base64: str):
@@ -65,7 +69,8 @@ async def upload_image(request: Request):
     image_embedding = await get_image_embedding(image_base64)
 
     try:
-        existing_nfts = await db["NFT"].find().to_list(None)
+        # Changed from motor's async find() to PyMongo's synchronous find()
+        existing_nfts = list(db["NFT"].find())
 
         for nft in existing_nfts:
             existing_embedding = nft.get("embedding")
@@ -77,7 +82,8 @@ async def upload_image(request: Request):
             if similarity > 0.9:
                 return {"error": "NFT already exists in MongoDB"}
 
-        await db["NFT"].insert_one({
+        # Changed from motor's async insert_one() to PyMongo's synchronous insert_one()
+        db["NFT"].insert_one({
             "name": image_name,
             "imageBase64": image_base64,
             "embedding": image_embedding.tolist()
